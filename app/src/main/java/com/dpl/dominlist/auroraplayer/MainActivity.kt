@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -72,7 +73,7 @@ fun PlayButton() {
                 shape = CircleShape,
             ) {
                 Image(
-                    imageVector = if (playerState) Icons.Filled.PlayArrow else Icons.Default.PlayArrow,
+                    imageVector = if (playerState) Icons.Default.Refresh else Icons.Default.PlayArrow,
                     contentDescription = "Play Arrow",
                     Modifier.size(80.dp)
                 )
