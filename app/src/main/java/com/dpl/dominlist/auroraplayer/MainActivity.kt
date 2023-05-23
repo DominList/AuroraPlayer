@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -28,9 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.SimpleBasePlayer
 import com.dpl.dominlist.auroraplayer.ui.theme.AuroraPlayerTheme
 
 class MainActivity : ComponentActivity() {
+
+
+//    val player =
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -73,7 +79,7 @@ fun PlayButton() {
                 shape = CircleShape,
             ) {
                 Image(
-                    imageVector = if (playerState) Icons.Default.Refresh else Icons.Default.PlayArrow,
+                    imageVector = if (playerState) Icons.Default.Pause else Icons.Default.PlayArrow,
                     contentDescription = "Play Arrow",
                     Modifier.size(80.dp)
                 )
