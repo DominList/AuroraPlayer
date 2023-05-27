@@ -16,7 +16,9 @@ object MediaPlayerModule {
     @Provides
     @ViewModelScoped
     fun provideMediaPlayer(app: Application) : Player
-    =  ExoPlayer.Builder(app).build()
+    =  ExoPlayer
+        .Builder(app)
+        .build()
 
     @Provides
     @ViewModelScoped

@@ -21,11 +21,11 @@ class MediaDataReader(
         }
         val fileName = app.contentResolver.query(
             uri,
-            arrayOf(MediaStore.Video.VideoColumns.DISPLAY_NAME),
+            arrayOf(MediaStore.Audio.AudioColumns.DISPLAY_NAME),
             null,
             null
         )?.use { cursor ->
-            val index = cursor.getColumnIndex(MediaStore.Video.VideoColumns.DISPLAY_NAME)
+            val index = cursor.getColumnIndex(MediaStore.Audio.AudioColumns.DISPLAY_NAME)
             cursor.moveToFirst()
             cursor.getString(index)
         }

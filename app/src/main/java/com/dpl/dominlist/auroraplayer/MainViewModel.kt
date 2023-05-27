@@ -19,11 +19,11 @@ class MainViewModel @Inject constructor(
     private val metaDataReader: MetaDataReader
 ): ViewModel() {
 
-    private val videoUris = savedStateHandle.getStateFlow("videoUris", emptyList<Uri>())
+    private val videoUris = savedStateHandle.getStateFlow("audioUris", emptyList<Uri>())
 
     val videoItems = videoUris.map { uris ->
         uris.map { uri ->
-            VideoItem(
+            AudioItem(
                 contentUri = uri,
                 mediaItem = MediaItem.fromUri(uri),
                 name = metaDataReader.getMetaDataFromUri(uri)?.fileName ?: "no name"
@@ -31,19 +31,30 @@ class MainViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L), emptyList())
 
+
+
     init {
         player.prepare()
+
     }
 
-    fun addVideoUri(uri: Uri) {
-        savedStateHandle["videoUris"] = videoUris.value + uri
-        player.addMediaItem( MediaItem.fromUri(uri))
+    fun addUri(uri: Uri) {
+        savedStateHandle["audioUris"] = videoUris.value + uri
+        player.addMediaItem(MediaItem.fromUri(uri))
     }
 
-    fun playVideo(uri: Uri) {
+    fun setMediaItem(uri: Uri) {
         player.setMediaItem(
             videoItems.value.find { it.contentUri == uri }?.mediaItem ?: return
         )
+    }
+
+    fun pause() {
+        player.pause()
+    }
+
+    fun play() {
+        player.play()
     }
 
     override fun onCleared() {

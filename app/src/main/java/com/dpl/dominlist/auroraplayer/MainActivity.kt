@@ -46,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.GetContent(),
                     onResult = { uri ->
-                        uri?.let(viewModel::addVideoUri)
+                        uri?.let(viewModel::addUri)
                     })
             var lifecycleEvent: Lifecycle.Event by remember {
                 mutableStateOf(Lifecycle.Event.ON_CREATE)
@@ -100,7 +99,7 @@ class MainActivity : ComponentActivity() {
 fun PlayerMainView(
     viewModel: MainViewModel,
     lifecycleEvent: Lifecycle.Event,
-    mediaItems: List<VideoItem>,
+    mediaItems: List<AudioItem>,
     selectMediaLauncher: ManagedActivityResultLauncher<String, Uri?>
 ) {
     AuroraPlayerTheme {
@@ -115,7 +114,12 @@ fun PlayerMainView(
                     mediaItems = mediaItems,
                     selectMediaLauncher = selectMediaLauncher
                 )
-                PlayerButtonsView()
+                PlayerButtonsView(
+                    viewModel = viewModel,
+                    lifecycleEvent = lifecycleEvent,
+                    mediaItems = mediaItems,
+                    selectMediaLauncher = selectMediaLauncher
+                )
             }
 
         }
@@ -127,7 +131,7 @@ fun PlayerMainView(
 fun VideoPlayer(
     viewModel: MainViewModel,
     lifecycleEvent: Lifecycle.Event,
-    mediaItems: List<VideoItem>,
+    mediaItems: List<AudioItem>,
     selectMediaLauncher: ManagedActivityResultLauncher<String, Uri?>
 ) {
     Column(
@@ -162,11 +166,11 @@ fun VideoPlayer(
 
         Spacer(modifier = Modifier.height(10.dp))
         IconButton(onClick = {
-            selectMediaLauncher.launch("music/*")
+            selectMediaLauncher.launch("audio/mp3")
         }) {
             Icon(
                 imageVector = Icons.Default.FileOpen,
-                contentDescription = "Select a video file"
+                contentDescription = "Select an audio file"
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -182,7 +186,7 @@ fun VideoPlayer(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            viewModel.playVideo(item.contentUri)
+                            viewModel.setMediaItem(item.contentUri)
                         }
                         .padding(16.dp)
                 )
@@ -191,21 +195,34 @@ fun VideoPlayer(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun PlayerButtonsView() {
+fun PlayerButtonsView(
+    viewModel: MainViewModel,
+    lifecycleEvent: Lifecycle.Event,
+    mediaItems: List<AudioItem>,
+    selectMediaLauncher: ManagedActivityResultLauncher<String, Uri?>
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        PlayButton()
+        PlayButton(
+            mediaItems = mediaItems,
+            playPause = { uri, isPlaying ->
+
+                viewModel.setMediaItem(uri)
+                viewModel.apply { if (isPlaying) play() else pause()  }
+            }
+        )
     }
 }
 
-@Preview
 @Composable
-fun PlayButton() {
+fun PlayButton(
+    mediaItems: List<AudioItem>,
+    playPause: (Uri, Boolean) -> Unit
+) {
 
     var playerState: Boolean by remember {
         mutableStateOf(false)
@@ -226,7 +243,10 @@ fun PlayButton() {
 
             Button(
                 modifier = Modifier.size(150.dp),
-                onClick = { playerState = playerState.not() },
+                onClick = {
+                    playerState = playerState.not()
+                    playPause.invoke(mediaItems.first().contentUri, playerState)
+                },
                 shape = CircleShape,
             ) {
                 Image(
