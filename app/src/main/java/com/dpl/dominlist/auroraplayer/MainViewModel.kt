@@ -16,36 +16,38 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     val player: Player,
     private val savedStateHandle: SavedStateHandle,
-    private val metaDataReader: MetaDataReader
-): ViewModel() {
+    private val metaDataReader: MetaDataReader,
+) : ViewModel() {
 
-    private val videoUris = savedStateHandle.getStateFlow("audioUris", emptyList<Uri>())
+    private val musicUris = savedStateHandle.getStateFlow("audioUris", metaDataReader.getAudioUris())
 
-    val videoItems = videoUris.map { uris ->
+    val musicItems = musicUris.map { uris ->
         uris.map { uri ->
             AudioItem(
                 contentUri = uri,
                 mediaItem = MediaItem.fromUri(uri),
-                name = metaDataReader.getMetaDataFromUri(uri)?.fileName ?: "no name"
+                name = metaDataReader.getMetaDataFromUri(uri)?.songName ?: "no name"
             )
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L), emptyList())
-
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L),
+        emptyList()
+    )
 
 
     init {
         player.prepare()
-
     }
 
     fun addUri(uri: Uri) {
-        savedStateHandle["audioUris"] = videoUris.value + uri
+        savedStateHandle["audioUris"] = musicUris.value + uri
         player.addMediaItem(MediaItem.fromUri(uri))
     }
 
     fun setMediaItem(uri: Uri) {
         player.setMediaItem(
-            videoItems.value.find { it.contentUri == uri }?.mediaItem ?: return
+            musicItems.value.find { it.contentUri == uri }?.mediaItem ?: return
         )
     }
 
@@ -61,5 +63,4 @@ class MainViewModel @Inject constructor(
         super.onCleared()
         player.release()
     }
-
 }

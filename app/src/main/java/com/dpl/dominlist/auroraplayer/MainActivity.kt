@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val viewModel: MainViewModel = hiltViewModel()
-            val mediaItems by viewModel.videoItems.collectAsState()
+            val mediaItems by viewModel.musicItems.collectAsState()
             val selectMediaLauncher: ManagedActivityResultLauncher<String, Uri?> =
                 rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.GetContent(),
@@ -91,6 +91,7 @@ class MainActivity : ComponentActivity() {
                 selectMediaLauncher = selectMediaLauncher
             )
 
+
         }
     }
 }
@@ -108,89 +109,33 @@ fun PlayerMainView(
             modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
             Column {
-                VideoPlayer(
-                    viewModel = viewModel,
-                    lifecycleEvent = lifecycleEvent,
-                    mediaItems = mediaItems,
-                    selectMediaLauncher = selectMediaLauncher
-                )
                 PlayerButtonsView(
                     viewModel = viewModel,
                     lifecycleEvent = lifecycleEvent,
                     mediaItems = mediaItems,
                     selectMediaLauncher = selectMediaLauncher
                 )
-            }
 
-        }
-    }
-}
-
-
-@Composable
-fun VideoPlayer(
-    viewModel: MainViewModel,
-    lifecycleEvent: Lifecycle.Event,
-    mediaItems: List<AudioItem>,
-    selectMediaLauncher: ManagedActivityResultLauncher<String, Uri?>
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(10.dp)
-    ) {
-        AndroidView(
-            factory = { context ->
-                PlayerView(context).also {
-                    it.player = viewModel.player
-                }
-            },
-            update = {
-                when (lifecycleEvent) {
-                    Lifecycle.Event.ON_PAUSE -> {
-                        it.onPause()
-                        it.player?.pause()
-                    }
-
-                    Lifecycle.Event.ON_RESUME -> {
-                        it.onResume()
-                    }
-
-                    else -> Unit
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(16 / 9f)
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-        IconButton(onClick = {
-            selectMediaLauncher.launch("audio/mp3")
-        }) {
-            Icon(
-                imageVector = Icons.Default.FileOpen,
-                contentDescription = "Select an audio file"
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .background(Color.Magenta)
-        ) {
-            items(mediaItems) { item ->
-                Text(
-                    text = item.name,
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            viewModel.setMediaItem(item.contentUri)
-                        }
-                        .padding(16.dp)
-                )
+                        .fillMaxHeight()
+                        .background(Color.Magenta)
+                ) {
+                    items(mediaItems) { item ->
+                        Text(
+                            text = item.name,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setMediaItem(item.contentUri)
+                                }
+                                .padding(16.dp)
+                        )
+                    }
+                }
             }
+
         }
     }
 }
@@ -244,8 +189,10 @@ fun PlayButton(
             Button(
                 modifier = Modifier.size(150.dp),
                 onClick = {
-                    playerState = playerState.not()
-                    playPause.invoke(mediaItems.first().contentUri, playerState)
+                    if(mediaItems.isNotEmpty()) {
+                        playerState = playerState.not()
+                        playPause.invoke(mediaItems.first().contentUri, playerState)
+                    }
                 },
                 shape = CircleShape,
             ) {
